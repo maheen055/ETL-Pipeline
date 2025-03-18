@@ -1,0 +1,19 @@
+CLASS DESIGN
+
+The CountryData class is responsible for managing time series data for multiple countries using a fixed-size hash table (of 512 slots) with double hashing for efficient lookups. Each country is represented by a CountryNode that stores the country name, country code, and a linked list of Series objects. Each Series object holds its own metadata (series name and series code) and dynamically allocated arrays for the years and corresponding data values; these arrays can be resized as more data is added. In Project 4, the previous range-splitting binary tree is replaced by this hash table for efficient insertion, lookup, and deletion operations. In addition, a dynamic build structure (an array of Entry pointers) is maintained. The BUILD command scans the hash table for countries that have a valid time series corresponding to a specified series code, computes the mean values for that series, and stores these in the build array. Importantly, the INSERT command now not only adds a new country to the hash table but also updates the build structure automatically (if a BUILD has already been executed) by computing the mean for the last-built series (tracked in the lastBuiltSeries member) and appending a corresponding Entry. Commands such as LOOKUP, REMOVE, LIST, FIND, RANGE, and LIMITS all operate on these structures to meet the project’s requirements.
+
+
+ALTERNATIVES AND JUSTIFICATION
+
+An array of fixed size was considered for storing time series data, but given that the number of time series per country is unknown, a fixed-size array would be either insufficient or wasteful. Similarly, storing time series as a single dynamically allocated array of (year, value) pairs was rejected due to the complexity of inserting or deleting data. Instead, using a linked list for the Series objects allows for dynamic resizing and simpler management of multiple indicators per country. For efficient lookups, a range-splitting binary tree (as used in Project 3) was replaced by a hash table employing double hashing. This approach guarantees an average-case lookup time of O(1) when collisions are few, while the dynamic build structure supports fast range-based queries without the overhead of maintaining a complex tree structure. The chosen design strikes a balance between flexibility (to handle an unknown number of series) and efficiency (through hashing and dynamic array allocation).
+
+RUNTIME ANALYSIS
+
+Given a country’s three-letter code, I first convert it into a base‑26 number and then compute the primary hash index as W % 512, where 512 is the size of my hash table. Assuming that the number of collisions is O(1), only a constant number of probes are needed to locate the country. Thus, on average, my LOOKUP command runs in O(1) time. However, in the worst-case scenario—if many collisions occur and almost every slot in the table must be probed—the LOOKUP command may end up checking all N entries in the hash table, resulting in a worst-case runtime of O(N). Therefore, I conclude that my LOOKUP command has an average-case runtime of O(1) (when collisions are minimal) and a worst-case runtime of O(N), where N is the number of countries.
+
+CITATIONS
+
+
+
+
+
